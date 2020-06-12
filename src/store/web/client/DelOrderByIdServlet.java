@@ -1,0 +1,42 @@
+package store.web.client;
+import java.io.IOException;
+import javax.servlet.ServletException;
+import javax.servlet.annotation.WebServlet;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+import store.service.OrderService;
+/**
+ * 删除订单
+ */
+@WebServlet("/delOrderById")
+public class DelOrderByIdServlet extends HttpServlet {
+	private static final long serialVersionUID = 1L;
+	public void doGet(HttpServletRequest request, HttpServletResponse response)
+			throws ServletException, IOException {
+		doPost(request, response);
+	}
+	public void doPost(HttpServletRequest request, HttpServletResponse response)
+			throws ServletException, IOException {
+		// 订单id
+		String id = request.getParameter("id");
+		// 已支付的订单带有type值为admin的参数
+		String type = request.getParameter("type");
+		OrderService service = new OrderService();
+		if (type != null && type.trim().length() > 0) {
+			//管理员调用service层方法删除订单
+			service.delOrderById(id);
+			if ("admin".equals(type)) {
+				request.getRequestDispatcher("/findOrders").forward(request, response);
+				return;
+			}
+		} else {
+			// 调用service层方法删除相应订单
+			service.delOrderByIdWithClient(id);
+		}
+		//response.sendRedirect(request.getContextPath() + "/client/delOrderSuccess.jsp");
+		request.getRequestDispatcher("/client/findOrderByUser").forward(request, response);
+		return;
+	}
+}
